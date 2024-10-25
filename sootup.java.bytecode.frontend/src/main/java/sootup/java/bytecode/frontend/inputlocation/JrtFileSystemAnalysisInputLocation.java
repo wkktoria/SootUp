@@ -83,7 +83,7 @@ public class JrtFileSystemAnalysisInputLocation implements ModuleInfoAnalysisInp
       @Nonnull ClassType classType, @Nonnull View view) {
     JavaClassType klassType = (JavaClassType) classType;
 
-    ClassProvider classProvider = new AsmJavaClassProvider(view);
+    ClassProvider classProvider = getClassProvider(view);
     Path filepath =
         theFileSystem.getPath(
             klassType.getFullyQualifiedName().replace('.', '/')
@@ -143,7 +143,7 @@ public class JrtFileSystemAnalysisInputLocation implements ModuleInfoAnalysisInp
       @Nonnull IdentifierFactory identifierFactory,
       @Nonnull View view) {
 
-    ClassProvider classProvider = new AsmJavaClassProvider(view);
+    ClassProvider classProvider = getClassProvider(view);
 
     String moduleInfoFilename =
         JavaModuleIdentifierFactory.MODULE_INFO_FILE
@@ -156,12 +156,15 @@ public class JrtFileSystemAnalysisInputLocation implements ModuleInfoAnalysisInp
       List<JavaSootClassSource> javaSootClassSources =
           paths
               .filter(
-                  filePath ->
-                      !Files.isDirectory(filePath)
-                          && filePath
-                              .toString()
-                              .endsWith(classProvider.getHandledFileType().getExtensionWithDot())
-                          && !filePath.toString().endsWith(moduleInfoFilename))
+                  filePath -> {
+                    if (!Files.isDirectory(filePath)) {
+                      String pathStr = filePath.toString();
+                      return pathStr.endsWith(
+                              classProvider.getHandledFileType().getExtensionWithDot())
+                          && !pathStr.endsWith(moduleInfoFilename);
+                    }
+                    return false;
+                  })
               .<SootClassSource>flatMap(
                   p ->
                       StreamUtils.optionalToStream(
@@ -172,6 +175,10 @@ public class JrtFileSystemAnalysisInputLocation implements ModuleInfoAnalysisInp
     } catch (IOException e) {
       throw new ResolveException("Error loading module " + moduleSignature, archiveRoot, e);
     }
+  }
+
+  protected ClassProvider getClassProvider(@Nonnull View view) {
+    return new AsmJavaClassProvider(view);
   }
 
   @Override
