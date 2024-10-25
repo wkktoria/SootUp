@@ -52,7 +52,7 @@ public class DefaultRuntimeAnalysisInputLocation implements AnalysisInputLocatio
 
     String version = System.getProperty("java.version");
     // are we using Java 8 or lower in the current JVM execution?
-    if (version.startsWith("1")) {
+    if (version.startsWith("1.")) {
       backingInputLocation = new DefaultRTJarAnalysisInputLocation(srcType, bodyInterceptors);
     } else {
       backingInputLocation = new JrtFileSystemAnalysisInputLocation(srcType, bodyInterceptors);
