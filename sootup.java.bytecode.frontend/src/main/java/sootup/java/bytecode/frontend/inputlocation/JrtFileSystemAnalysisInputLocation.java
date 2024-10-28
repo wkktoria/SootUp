@@ -32,6 +32,7 @@ import org.apache.commons.io.FilenameUtils;
 import sootup.core.IdentifierFactory;
 import sootup.core.frontend.ClassProvider;
 import sootup.core.frontend.ResolveException;
+import sootup.core.frontend.SootClassSource;
 import sootup.core.inputlocation.AnalysisInputLocation;
 import sootup.core.model.SourceType;
 import sootup.core.transform.BodyInterceptor;
@@ -82,7 +83,7 @@ public class JrtFileSystemAnalysisInputLocation implements ModuleInfoAnalysisInp
       @Nonnull ClassType classType, @Nonnull View view) {
     JavaClassType klassType = (JavaClassType) classType;
 
-    ClassProvider classProvider = new AsmJavaClassProvider(view);
+    ClassProvider classProvider = getClassProvider(view);
     Path filepath =
         theFileSystem.getPath(
             klassType.getFullyQualifiedName().replace('.', '/')
@@ -142,31 +143,42 @@ public class JrtFileSystemAnalysisInputLocation implements ModuleInfoAnalysisInp
       @Nonnull IdentifierFactory identifierFactory,
       @Nonnull View view) {
 
-    ClassProvider classProvider = new AsmJavaClassProvider(view);
+    ClassProvider classProvider = getClassProvider(view);
 
     String moduleInfoFilename =
         JavaModuleIdentifierFactory.MODULE_INFO_FILE
             + classProvider.getHandledFileType().getExtensionWithDot();
 
     final Path archiveRoot = theFileSystem.getPath("modules", moduleSignature.getModuleName());
-    try {
-
-      return Files.walk(archiveRoot)
-          .filter(
-              filePath ->
-                  !Files.isDirectory(filePath)
-                      && filePath
-                          .toString()
-                          .endsWith(classProvider.getHandledFileType().getExtensionWithDot())
-                      && !filePath.toString().endsWith(moduleInfoFilename))
-          .flatMap(
-              p ->
-                  StreamUtils.optionalToStream(
-                      classProvider.createClassSource(this, p, fromPath(p, identifierFactory))))
-          .map(src -> (JavaSootClassSource) src);
+    try (Stream<Path> paths = Files.walk(archiveRoot)) {
+      // collect into a list and then return a stream, so we do not leak the Stream returned by
+      // Files.walk
+      List<JavaSootClassSource> javaSootClassSources =
+          paths
+              .filter(
+                  filePath -> {
+                    if (!Files.isDirectory(filePath)) {
+                      String pathStr = filePath.toString();
+                      return pathStr.endsWith(
+                              classProvider.getHandledFileType().getExtensionWithDot())
+                          && !pathStr.endsWith(moduleInfoFilename);
+                    }
+                    return false;
+                  })
+              .<SootClassSource>flatMap(
+                  p ->
+                      StreamUtils.optionalToStream(
+                          classProvider.createClassSource(this, p, fromPath(p, identifierFactory))))
+              .map(src -> (JavaSootClassSource) src)
+              .collect(Collectors.toList());
+      return javaSootClassSources.stream();
     } catch (IOException e) {
       throw new ResolveException("Error loading module " + moduleSignature, archiveRoot, e);
     }
+  }
+
+  protected ClassProvider getClassProvider(@Nonnull View view) {
+    return new AsmJavaClassProvider(view);
   }
 
   @Override
