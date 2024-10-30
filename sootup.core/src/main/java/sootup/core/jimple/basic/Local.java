@@ -154,12 +154,12 @@ public class Local implements Immediate, LValue, Acceptor<ImmediateVisitor> {
     return defStmts;
   }
 
-  public List<Stmt> getStmtsUsingthisLocal(Collection<Stmt> stmts, Stmt removedStmt) {
+  public List<Stmt> getStmtsUsingOrDefiningthisLocal(Collection<Stmt> stmts, Stmt removedStmt) {
     List<Stmt> localOccurrences = new ArrayList<>();
     for (Stmt stmt : stmts) {
       if (stmt.equivTo(removedStmt)) continue;
-      List<Value> stmtUses = stmt.getUsesAndDefs().collect(Collectors.toList());
-      for (Value stmtUse : stmtUses) {
+      List<Value> stmtUsesAndDefs = stmt.getUsesAndDefs().collect(Collectors.toList());
+      for (Value stmtUse : stmtUsesAndDefs) {
         if (stmtUse instanceof Local && stmtUse.equivTo(this)) {
           localOccurrences.add(stmt);
         }
