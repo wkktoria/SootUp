@@ -330,13 +330,12 @@ public class DexBody {
     // If the Nop Statements are not removed, graph.initializeWith throws a runtime exception
     // It is only for the case where there is a JNop Statement after the return statement. Crazy
     // android code :(
-    String className = classType.getClassName();
-    if (DexUtil.isByteCodeClassName(className)) {
-      className = DexUtil.dottedClassName(className);
-    }
     MethodSignature methodSignature =
         new MethodSignature(
-            classType, className, parameterTypes, DexUtil.toSootType(method.getReturnType(), 0));
+            classType,
+            method.getName(),
+            parameterTypes,
+            DexUtil.toSootType(method.getReturnType(), 0));
     while (stmtList.get(stmtList.size() - 1) instanceof JNopStmt) {
       stmtList.remove(stmtList.size() - 1);
     }
