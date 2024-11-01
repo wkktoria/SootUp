@@ -194,36 +194,40 @@ public class JimpleConverter {
       for (int i = 0; i < ctx.member().size(); i++) {
         if (ctx.member(i).method() != null) {
           final SootMethod m = new MethodVisitor().visitMember(ctx.member(i));
-          Body.BodyBuilder bodyBuilder = Body.builder(m.getBody(), m.getModifiers());
-          for (BodyInterceptor bodyInterceptor : bodyInterceptors) {
-            try {
-              bodyInterceptor.interceptBody(bodyBuilder, view);
-              bodyBuilder
-                  .getStmtGraph()
-                  .validateStmtConnectionsInGraph(); // TODO: remove in the future ;-)
-            } catch (Exception e) {
-              throw new IllegalStateException(
-                  "Failed to apply " + bodyInterceptor + " to " + m.getSignature(), e);
-            }
-          }
-          Body modifiedBody = bodyBuilder.build();
-          SootMethod sm =
-              new SootMethod(
-                  new OverridingBodySource(m.getBodySource()).withBody(modifiedBody),
-                  m.getSignature(),
-                  m.getModifiers(),
-                  m.getExceptionSignatures(),
-                  m.getPosition());
           if (methods.stream()
               .anyMatch(
                   meth -> {
-                    final MethodSignature signature = sm.getSignature();
+                    final MethodSignature signature = m.getSignature();
                     return meth.getSignature().equals(signature);
                   })) {
             throw new ResolveException(
                 "Method with the same Signature does already exist.", path, m.getPosition());
           }
-          methods.add(sm);
+          if (m.isConcrete()) {
+            Body.BodyBuilder bodyBuilder = Body.builder(m.getBody(), m.getModifiers());
+            for (BodyInterceptor bodyInterceptor : bodyInterceptors) {
+              try {
+                bodyInterceptor.interceptBody(bodyBuilder, view);
+                bodyBuilder
+                    .getStmtGraph()
+                    .validateStmtConnectionsInGraph(); // TODO: remove in the future ;-)
+              } catch (Exception e) {
+                throw new IllegalStateException(
+                    "Failed to apply " + bodyInterceptor + " to " + m.getSignature(), e);
+              }
+            }
+            Body modifiedBody = bodyBuilder.build();
+            SootMethod sm =
+                new SootMethod(
+                    new OverridingBodySource(m.getBodySource()).withBody(modifiedBody),
+                    m.getSignature(),
+                    m.getModifiers(),
+                    m.getExceptionSignatures(),
+                    m.getPosition());
+            methods.add(sm);
+          } else {
+            methods.add(m);
+          }
         } else {
           final JimpleParser.FieldContext fieldCtx = ctx.member(i).field();
           EnumSet<FieldModifier> modifier = getFieldModifiers(fieldCtx.field_modifier());
