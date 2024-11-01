@@ -66,7 +66,7 @@ public class JimpleStringAnalysisInputLocation implements AnalysisInputLocation 
       JimpleConverter jimpleConverter = new JimpleConverter();
       classSource =
           jimpleConverter.run(
-              CharStreams.fromString(jimpleFileContents), this, path, bodyInterceptors);
+              CharStreams.fromString(jimpleFileContents), this, path, bodyInterceptors, null);
     } catch (Exception e) {
       throw new IllegalArgumentException("No valid Jimple given.", e);
     }
