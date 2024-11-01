@@ -53,14 +53,10 @@ public class DexMethod {
       final Method method, List<BodyInterceptor> bodyInterceptors, @Nonnull View view) {
     int modifierFlags = method.getAccessFlags();
     if (Modifier.isAbstract(modifierFlags) || Modifier.isNative(modifierFlags)) {
-      String className = declaringclassType.getClassName();
-      if (DexUtil.isByteCodeClassName(className)) {
-        className = DexUtil.dottedClassName(className);
-      }
       MethodSignature methodSignature =
           new MethodSignature(
               declaringclassType,
-              className,
+              method.getName(),
               Collections.emptyList(),
               DexUtil.toSootType(method.getReturnType(), 0));
       DexMethodSource dexMethodSource =
