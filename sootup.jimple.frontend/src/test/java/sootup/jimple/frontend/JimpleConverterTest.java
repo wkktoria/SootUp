@@ -32,7 +32,12 @@ public class JimpleConverterTest {
     JimpleConverter jimpleVisitor = new JimpleConverter();
     EagerInputLocation eagerInputLocation = new EagerInputLocation();
     final OverridingClassSource scs =
-        jimpleVisitor.run(cs, eagerInputLocation, Paths.get(""), Collections.emptyList(), new JimpleView(eagerInputLocation));
+        jimpleVisitor.run(
+            cs,
+            eagerInputLocation,
+            Paths.get(""),
+            Collections.emptyList(),
+            new JimpleView(eagerInputLocation));
     return new SootClass(scs, SourceType.Application);
   }
 
