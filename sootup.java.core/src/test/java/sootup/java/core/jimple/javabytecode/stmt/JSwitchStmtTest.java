@@ -1,8 +1,5 @@
 package sootup.java.core.jimple.javabytecode.stmt;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.*;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import sootup.core.jimple.basic.StmtPositionInfo;
@@ -12,6 +9,13 @@ import sootup.core.jimple.common.stmt.JReturnStmt;
 import sootup.core.jimple.common.stmt.JReturnVoidStmt;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.jimple.javabytecode.stmt.JSwitchStmt;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ListIterator;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("Java8")
 public class JSwitchStmtTest {
@@ -24,7 +28,6 @@ public class JSwitchStmtTest {
 
     Stmt stmt = new JSwitchStmt(IntConstant.getInstance(42), lookupValues, nop);
     Stmt stmtDifferentKey = new JSwitchStmt(IntConstant.getInstance(123), lookupValues, nop);
-    Stmt stmtDifferentDefault = new JSwitchStmt(IntConstant.getInstance(42), lookupValues, nop);
 
     // toString
     assertEquals("switch(42) {     default:  }", stmt.toString());
@@ -43,7 +46,6 @@ public class JSwitchStmtTest {
     assertFalse(stmt.equivTo(this));
     assertTrue(stmt.equivTo(stmt));
     assertFalse(stmt.equivTo(switchWithDefault));
-    assertFalse(stmt.equivTo(stmtDifferentDefault));
     assertFalse(stmt.equivTo(stmtDifferentKey));
   }
 
@@ -57,7 +59,6 @@ public class JSwitchStmtTest {
     targets.add(new JNopStmt(nop));
     JSwitchStmt stmt = new JSwitchStmt(IntConstant.getInstance(123), 1, 4, nop);
 
-    ArrayList<Stmt> targets2 = new ArrayList<>();
     targets.add(new JReturnStmt(IntConstant.getInstance(1), nop));
     targets.add(new JReturnStmt(IntConstant.getInstance(2), nop));
     targets.add(new JNopStmt(nop));
@@ -66,7 +67,6 @@ public class JSwitchStmtTest {
     Stmt stmt3 = new JSwitchStmt(IntConstant.getInstance(456), 1, 4, nop);
     Stmt stmt4 = new JSwitchStmt(IntConstant.getInstance(123), 2, 4, nop);
     Stmt stmt5 = new JSwitchStmt(IntConstant.getInstance(123), 1, 5, nop);
-    Stmt stmt6 = new JSwitchStmt(IntConstant.getInstance(123), 1, 4, nop);
 
     // toString
     assertEquals(
@@ -76,13 +76,11 @@ public class JSwitchStmtTest {
     // equivTo
     assertFalse(stmt.equivTo(666));
     assertTrue(stmt.equivTo(stmt));
-    assertFalse(stmt.equivTo(stmt2));
+    assertTrue(stmt.equivTo(stmt2));
 
-    assertFalse(stmt.equivTo(stmt2));
     assertFalse(stmt.equivTo(stmt3));
     assertFalse(stmt.equivTo(stmt4));
     assertFalse(stmt.equivTo(stmt5));
-    assertFalse(stmt.equivTo(stmt6));
   }
 
   @Test
@@ -220,7 +218,6 @@ public class JSwitchStmtTest {
 
     Stmt switchStmt = new JSwitchStmt(IntConstant.getInstance(42), lookupValues, nop);
     Stmt stmtDifferentKey = new JSwitchStmt(IntConstant.getInstance(123), lookupValues, nop);
-    Stmt stmtDifferentDefault = new JSwitchStmt(IntConstant.getInstance(42), lookupValues, nop);
 
     // toString
     assertEquals("switch(42) {     default:  }", switchStmt.toString());
@@ -237,7 +234,6 @@ public class JSwitchStmtTest {
     assertFalse(switchStmt.equivTo(this));
     assertTrue(switchStmt.equivTo(switchStmt));
     assertFalse(switchStmt.equivTo(differentSwitchStmt));
-    assertFalse(switchStmt.equivTo(stmtDifferentDefault));
     assertFalse(switchStmt.equivTo(stmtDifferentKey));
   }
 }

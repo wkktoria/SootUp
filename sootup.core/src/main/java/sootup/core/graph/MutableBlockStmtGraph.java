@@ -24,6 +24,9 @@ package sootup.core.graph;
 
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
+import java.util.*;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import sootup.core.jimple.Jimple;
@@ -39,10 +42,6 @@ import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.ClassType;
 import sootup.core.types.Type;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.*;
 
 /*
  * Implementation of a Control Flow Graph which stores Stmts, each Trap- and Branching Information directly in its Blocks.
