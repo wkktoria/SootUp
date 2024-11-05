@@ -28,12 +28,7 @@ import sootup.core.graph.BasicBlock;
 import sootup.core.jimple.common.constant.Constant;
 import sootup.core.jimple.common.constant.IntConstant;
 import sootup.core.jimple.common.expr.*;
-import sootup.core.jimple.common.ref.JArrayRef;
-import sootup.core.jimple.common.ref.JCaughtExceptionRef;
-import sootup.core.jimple.common.ref.JInstanceFieldRef;
-import sootup.core.jimple.common.ref.JParameterRef;
-import sootup.core.jimple.common.ref.JStaticFieldRef;
-import sootup.core.jimple.common.ref.JThisRef;
+import sootup.core.jimple.common.ref.*;
 import sootup.core.jimple.common.stmt.*;
 import sootup.core.jimple.javabytecode.stmt.*;
 
@@ -200,7 +195,7 @@ public class JimpleComparator {
     }
     JSwitchStmt otherSwitchStmt = (JSwitchStmt) o;
 
-    if (stmt.getKey() != otherSwitchStmt.getKey()) {
+    if (!stmt.getKey().equivTo(otherSwitchStmt.getKey())) {
       return false;
     }
 
