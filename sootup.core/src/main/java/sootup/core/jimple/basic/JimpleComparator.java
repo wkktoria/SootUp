@@ -22,6 +22,8 @@ package sootup.core.jimple.basic;
  * #L%
  */
 
+import java.util.Iterator;
+import java.util.List;
 import sootup.core.graph.BasicBlock;
 import sootup.core.jimple.common.constant.Constant;
 import sootup.core.jimple.common.constant.IntConstant;
@@ -29,9 +31,6 @@ import sootup.core.jimple.common.expr.*;
 import sootup.core.jimple.common.ref.*;
 import sootup.core.jimple.common.stmt.*;
 import sootup.core.jimple.javabytecode.stmt.*;
-
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * This class contains the equivalence implementations for the individual {@link
