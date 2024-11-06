@@ -48,8 +48,8 @@ public class JimpleStringAnalysisInputLocation implements AnalysisInputLocation 
 
   @Nonnull final Path path = Paths.get("only-in-memory.jimple");
   @Nonnull final List<BodyInterceptor> bodyInterceptors;
-  @Nonnull private final OverridingClassSource classSource;
   @Nonnull final SourceType sourceType;
+  private String jimpleFileContents;
 
   public JimpleStringAnalysisInputLocation(@Nonnull String jimpleFileContents) {
     this(jimpleFileContents, SourceType.Application, Collections.emptyList());
@@ -59,34 +59,37 @@ public class JimpleStringAnalysisInputLocation implements AnalysisInputLocation 
       @Nonnull String jimpleFileContents,
       @Nonnull SourceType sourceType,
       @Nonnull List<BodyInterceptor> bodyInterceptors) {
+    this.jimpleFileContents = jimpleFileContents;
     this.bodyInterceptors = bodyInterceptors;
     this.sourceType = sourceType;
+  }
 
+  private OverridingClassSource getOverridingClassSource(
+      String jimpleFileContents, List<BodyInterceptor> bodyInterceptors, View view) {
+    final @Nonnull OverridingClassSource classSource;
     try {
       JimpleConverter jimpleConverter = new JimpleConverter();
       classSource =
           jimpleConverter.run(
-              CharStreams.fromString(jimpleFileContents),
-              this,
-              path,
-              bodyInterceptors,
-              new JimpleView(this));
+              CharStreams.fromString(jimpleFileContents), this, path, bodyInterceptors, view);
     } catch (Exception e) {
       throw new IllegalArgumentException("No valid Jimple given.", e);
     }
+    return classSource;
   }
 
   @Nonnull
   @Override
   public Optional<? extends SootClassSource> getClassSource(
       @Nonnull ClassType type, @Nonnull View view) {
-    return Optional.of(classSource);
+    return Optional.of(getOverridingClassSource(jimpleFileContents, bodyInterceptors, view));
   }
 
   @Nonnull
   @Override
   public Collection<? extends SootClassSource> getClassSources(@Nonnull View view) {
-    return Collections.singletonList(classSource);
+    return Collections.singletonList(
+        getOverridingClassSource(jimpleFileContents, bodyInterceptors, view));
   }
 
   @Nonnull
@@ -101,8 +104,9 @@ public class JimpleStringAnalysisInputLocation implements AnalysisInputLocation 
     return bodyInterceptors;
   }
 
+  /** This is expensive, don't use in production code. Use it only for test case for convenience. */
   @Nonnull
-  public ClassType getClassType() {
-    return classSource.getClassType();
+  public ClassType getClassType(@Nonnull View view) {
+    return getOverridingClassSource(jimpleFileContents, bodyInterceptors, view).getClassType();
   }
 }

@@ -57,12 +57,12 @@ public class JimpleStringAnalysisInputLocationTest {
         new JimpleStringAnalysisInputLocation(methodStr);
 
     View view = new JimpleView(Collections.singletonList(analysisInputLocation));
-    assertTrue(view.getClass(analysisInputLocation.getClassType()).isPresent());
+    assertTrue(view.getClass(analysisInputLocation.getClassType(view)).isPresent());
 
     MethodSignature methodSig =
         view.getIdentifierFactory()
             .getMethodSignature(
-                analysisInputLocation.getClassType(),
+                analysisInputLocation.getClassType(view),
                 "banana",
                 VoidType.getInstance(),
                 Collections.emptyList());
