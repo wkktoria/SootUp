@@ -180,7 +180,7 @@ public class ViewTypeHierarchy implements MutableTypeHierarchy {
     Graph<Vertex, Edge> graph = lazyScanResult.get().graph;
     Vertex vertex = lazyScanResult.get().typeToVertex.get(type);
     if (vertex == null) {
-      logger.warn("Could not find {} in this hierarchy!", type.toString());
+      logger.debug("Could not find {} in this hierarchy!", type.toString());
       return Collections.emptySet();
     }
     Set<Vertex> ancestors = new HashSet<>();
