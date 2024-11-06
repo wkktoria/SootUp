@@ -35,7 +35,10 @@ import sootup.core.jimple.basic.LocalGenerator;
 import sootup.core.jimple.basic.StmtPositionInfo;
 import sootup.core.jimple.basic.Trap;
 import sootup.core.jimple.common.ref.JCaughtExceptionRef;
-import sootup.core.jimple.common.stmt.*;
+import sootup.core.jimple.common.stmt.BranchingStmt;
+import sootup.core.jimple.common.stmt.FallsThroughStmt;
+import sootup.core.jimple.common.stmt.JIdentityStmt;
+import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.ClassType;
 import sootup.core.types.Type;
@@ -53,7 +56,7 @@ public class MutableBlockStmtGraph extends MutableStmtGraph {
   @Nonnull
   private final Map<Stmt, Pair<Integer, MutableBasicBlock>> stmtToBlock = new IdentityHashMap<>();
 
-  @Nonnull private final Set<MutableBasicBlock> blocks = new HashSet<>();
+  @Nonnull private final Set<MutableBasicBlock> blocks = new LinkedHashSet<>();
 
   public MutableBlockStmtGraph() {}
 
