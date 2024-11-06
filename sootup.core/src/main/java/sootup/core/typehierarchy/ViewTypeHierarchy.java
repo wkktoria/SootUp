@@ -22,6 +22,12 @@ package sootup.core.typehierarchy;
  */
 
 import com.google.common.base.Suppliers;
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -33,13 +39,6 @@ import sootup.core.typehierarchy.ViewTypeHierarchy.ScanResult.EdgeType;
 import sootup.core.typehierarchy.ViewTypeHierarchy.ScanResult.Vertex;
 import sootup.core.types.ClassType;
 import sootup.core.views.View;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * Full documentation is in the <a
