@@ -26,7 +26,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import org.jf.dexlib2.dexbacked.raw.EncodedValue;
@@ -78,16 +77,9 @@ public class DexClassSource extends JavaSootClassSource {
   @Override
   public Collection<? extends JavaSootMethod> resolveMethods() throws ResolveException {
     if (classInformation != null) {
-      Iterable<? extends Method> methodIterable = classInformation.classDefinition.getMethods();
       DexMethod dexMethod = createDexMethodFactory(classInformation.dexEntry, classSignature);
-      // Convert the Iterable to a Stream
-      Stream<? extends Method> methodStream =
-          StreamSupport.stream(methodIterable.spliterator(), false);
-      Iterable<? extends Method> virtualMethodIterable =
-          classInformation.classDefinition.getVirtualMethods();
-      Stream<? extends Method> virtualMethodStream =
-          StreamSupport.stream(virtualMethodIterable.spliterator(), false);
-      return Stream.concat(methodStream, virtualMethodStream)
+      return StreamSupport.stream(
+              classInformation.classDefinition.getMethods().spliterator(), false)
           .map(method -> loadMethod(method, dexMethod))
           .collect(Collectors.toSet());
     } else {
