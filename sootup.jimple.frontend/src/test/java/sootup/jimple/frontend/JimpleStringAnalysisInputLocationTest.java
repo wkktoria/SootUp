@@ -39,7 +39,13 @@ public class JimpleStringAnalysisInputLocationTest {
   public void testInvalidInput() {
     String methodStr = "This is not Jimple its just a Sentence.";
     assertThrows(
-        IllegalArgumentException.class, () -> new JimpleStringAnalysisInputLocation(methodStr));
+        IllegalArgumentException.class,
+        () -> {
+          JimpleStringAnalysisInputLocation analysisInputLocation =
+              new JimpleStringAnalysisInputLocation(methodStr);
+          JimpleView view = new JimpleView(analysisInputLocation);
+          analysisInputLocation.getClassSources(view);
+        });
   }
 
   @Test
