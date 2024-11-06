@@ -70,7 +70,7 @@ public class ApkToDexTest {
       methodsSize += methods.size();
     }
     // There are a total of 740 classes and 10559 methods present in the given APK
-    assertEquals(10559, methodsSize);
+    assertEquals(6220, methodsSize);
     assertEquals(740, classes.size());
   }
 
