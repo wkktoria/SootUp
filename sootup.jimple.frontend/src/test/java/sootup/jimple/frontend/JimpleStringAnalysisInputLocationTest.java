@@ -22,8 +22,7 @@ package sootup.jimple.frontend;
  * #L%
  */
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collections;
 import org.junit.jupiter.api.Tag;
@@ -31,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import sootup.core.model.SourceType;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.VoidType;
+import sootup.interceptors.DeadAssignmentEliminator;
 
 @Tag("Java8")
 public class JimpleStringAnalysisInputLocationTest {
@@ -61,15 +61,17 @@ public class JimpleStringAnalysisInputLocationTest {
 
     JimpleStringAnalysisInputLocation analysisInputLocation =
         new JimpleStringAnalysisInputLocation(
-            methodStr, SourceType.Application, Collections.emptyList());
+            methodStr,
+            SourceType.Application,
+            Collections.singletonList(new DeadAssignmentEliminator()));
 
     JimpleView view = new JimpleView(Collections.singletonList(analysisInputLocation));
-    assertTrue(view.getClassTypes(analysisInputLocation).isPresent());
+    assertNotNull(view.getIdentifierFactory().getClassType("DummyClass"));
 
     MethodSignature methodSig =
         view.getIdentifierFactory()
             .getMethodSignature(
-                view.getClassTypes(analysisInputLocation).get(),
+                view.getIdentifierFactory().getClassType("DummyClass"),
                 "banana",
                 VoidType.getInstance(),
                 Collections.emptyList());

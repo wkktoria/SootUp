@@ -157,12 +157,4 @@ public class JimpleView extends AbstractView {
         .forEach(this::buildClassFrom);
     isFullyResolved = true;
   }
-
-  /** This is expensive, don't use in production code. Use it only for test case for convenience. */
-  @Nonnull
-  public Optional<ClassType> getClassTypes(@Nonnull AnalysisInputLocation analysisInputLocation) {
-    Collection<? extends SootClassSource> classSources =
-        analysisInputLocation.getClassSources(this);
-    return classSources.stream().map(AbstractClassSource::getClassType).findAny();
-  }
 }
