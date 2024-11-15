@@ -37,6 +37,7 @@ import sootup.core.model.SourceType;
 import sootup.core.transform.BodyInterceptor;
 import sootup.core.types.ClassType;
 import sootup.core.views.View;
+import sootup.interceptors.BytecodeBodyInterceptors;
 
 /**
  * This AnalysisInputLocation encapsulates and represents a single Jimple "file" - the contents of
@@ -52,7 +53,10 @@ public class JimpleStringAnalysisInputLocation implements AnalysisInputLocation 
   private String jimpleFileContents;
 
   public JimpleStringAnalysisInputLocation(@Nonnull String jimpleFileContents) {
-    this(jimpleFileContents, SourceType.Application, Collections.emptyList());
+    this(
+        jimpleFileContents,
+        SourceType.Application,
+        BytecodeBodyInterceptors.Default.getBodyInterceptors());
   }
 
   public JimpleStringAnalysisInputLocation(
@@ -102,11 +106,5 @@ public class JimpleStringAnalysisInputLocation implements AnalysisInputLocation 
   @Override
   public List<BodyInterceptor> getBodyInterceptors() {
     return bodyInterceptors;
-  }
-
-  /** This is expensive, don't use in production code. Use it only for test case for convenience. */
-  @Nonnull
-  public ClassType getClassType(@Nonnull View view) {
-    return getOverridingClassSource(jimpleFileContents, bodyInterceptors, view).getClassType();
   }
 }

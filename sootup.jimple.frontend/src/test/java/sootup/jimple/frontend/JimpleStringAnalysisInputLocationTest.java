@@ -28,9 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Collections;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import sootup.core.model.SourceType;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.VoidType;
-import sootup.core.views.View;
 
 @Tag("Java8")
 public class JimpleStringAnalysisInputLocationTest {
@@ -60,15 +60,16 @@ public class JimpleStringAnalysisInputLocationTest {
             + "}";
 
     JimpleStringAnalysisInputLocation analysisInputLocation =
-        new JimpleStringAnalysisInputLocation(methodStr);
+        new JimpleStringAnalysisInputLocation(
+            methodStr, SourceType.Application, Collections.emptyList());
 
-    View view = new JimpleView(Collections.singletonList(analysisInputLocation));
-    assertTrue(view.getClass(analysisInputLocation.getClassType(view)).isPresent());
+    JimpleView view = new JimpleView(Collections.singletonList(analysisInputLocation));
+    assertTrue(view.getClassTypes(analysisInputLocation).isPresent());
 
     MethodSignature methodSig =
         view.getIdentifierFactory()
             .getMethodSignature(
-                analysisInputLocation.getClassType(view),
+                view.getClassTypes(analysisInputLocation).get(),
                 "banana",
                 VoidType.getInstance(),
                 Collections.emptyList());
