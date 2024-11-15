@@ -37,16 +37,19 @@ import sootup.core.inputlocation.AnalysisInputLocation;
 import sootup.core.inputlocation.FileType;
 import sootup.core.transform.BodyInterceptor;
 import sootup.core.types.ClassType;
+import sootup.core.views.View;
 
 /** @author Markus Schmidt */
 public class JimpleClassProvider implements ClassProvider {
 
   @Nonnull private final List<BodyInterceptor> bodyInterceptors;
+  @Nonnull private final View view;
 
   private static final @Nonnull Logger logger = LoggerFactory.getLogger(JimpleClassProvider.class);
 
-  public JimpleClassProvider(List<BodyInterceptor> bodyInterceptors) {
+  public JimpleClassProvider(List<BodyInterceptor> bodyInterceptors, @Nonnull View view) {
     this.bodyInterceptors = bodyInterceptors;
+    this.view = view;
   }
 
   @Override
@@ -57,7 +60,7 @@ public class JimpleClassProvider implements ClassProvider {
       final JimpleConverter jimpleConverter = new JimpleConverter();
       return Optional.of(
           jimpleConverter.run(
-              CharStreams.fromPath(sourcePath), inputlocation, sourcePath, bodyInterceptors));
+              CharStreams.fromPath(sourcePath), inputlocation, sourcePath, bodyInterceptors, view));
     } catch (IOException | ResolveException e) {
       logger.warn(
           "The jimple file of "

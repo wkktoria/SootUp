@@ -120,13 +120,13 @@ public class JimpleAnalysisInputLocation implements AnalysisInputLocation {
   @Nonnull
   public Collection<SootClassSource> getClassSources(@Nonnull View view) {
     return walkDirectory(
-        path, view.getIdentifierFactory(), new JimpleClassProvider(bodyInterceptors));
+        path, view.getIdentifierFactory(), new JimpleClassProvider(bodyInterceptors, view));
   }
 
   @Override
   @Nonnull
   public Optional<SootClassSource> getClassSource(@Nonnull ClassType type, @Nonnull View view) {
-    final JimpleClassProvider classProvider = new JimpleClassProvider(bodyInterceptors);
+    final JimpleClassProvider classProvider = new JimpleClassProvider(bodyInterceptors, view);
 
     final String ext = classProvider.getHandledFileType().toString().toLowerCase();
 
