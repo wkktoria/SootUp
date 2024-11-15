@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import sootup.core.model.SourceType;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.VoidType;
+import sootup.core.views.View;
 import sootup.interceptors.DeadAssignmentEliminator;
 
 @Tag("Java8")
@@ -65,7 +66,7 @@ public class JimpleStringAnalysisInputLocationTest {
             SourceType.Application,
             Collections.singletonList(new DeadAssignmentEliminator()));
 
-    JimpleView view = new JimpleView(Collections.singletonList(analysisInputLocation));
+    View view = new JimpleView(Collections.singletonList(analysisInputLocation));
     assertNotNull(view.getIdentifierFactory().getClassType("DummyClass"));
 
     MethodSignature methodSig =
