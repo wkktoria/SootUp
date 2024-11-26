@@ -49,6 +49,7 @@ import sootup.core.signatures.SootClassMemberSignature;
 import sootup.core.signatures.SootClassMemberSubSignature;
 import sootup.core.transform.BodyInterceptor;
 import sootup.core.types.*;
+import sootup.core.views.View;
 import sootup.java.core.JavaIdentifierFactory;
 import sootup.java.core.language.JavaJimple;
 import sootup.jimple.JimpleBaseVisitor;
@@ -59,41 +60,27 @@ public class JimpleConverter {
   public OverridingClassSource run(
       @Nonnull CharStream charStream,
       @Nonnull AnalysisInputLocation inputlocation,
-      @Nonnull Path sourcePath) {
-    return run(charStream, inputlocation, sourcePath, Collections.emptyList());
-  }
-
-  public OverridingClassSource run(
-      @Nonnull CharStream charStream,
-      @Nonnull AnalysisInputLocation inputlocation,
       @Nonnull Path sourcePath,
-      @Nonnull List<BodyInterceptor> bodyInterceptors) {
+      @Nonnull List<BodyInterceptor> bodyInterceptors,
+      @Nonnull View view) {
 
     final JimpleParser jimpleParser =
         JimpleConverterUtil.createJimpleParser(charStream, sourcePath);
     jimpleParser.setErrorHandler(new BailErrorStrategy());
 
-    return run(jimpleParser, inputlocation, sourcePath, bodyInterceptors);
-  }
-
-  public OverridingClassSource run(
-      @Nonnull JimpleParser parser,
-      @Nonnull AnalysisInputLocation inputlocation,
-      @Nonnull Path sourcePath) {
-    return run(parser, inputlocation, sourcePath, Collections.emptyList());
+    return run(jimpleParser, inputlocation, sourcePath, bodyInterceptors, view);
   }
 
   public OverridingClassSource run(
       @Nonnull JimpleParser parser,
       @Nonnull AnalysisInputLocation inputlocation,
       @Nonnull Path sourcePath,
-      @Nonnull List<BodyInterceptor> bodyInterceptors) {
-
-    // FIXME: [ms] apply bodyInterceptors or better: move that logic into View itself!
+      @Nonnull List<BodyInterceptor> bodyInterceptors,
+      @Nonnull View view) {
 
     ClassVisitor classVisitor;
     try {
-      classVisitor = new ClassVisitor(sourcePath);
+      classVisitor = new ClassVisitor(sourcePath, bodyInterceptors, view);
       classVisitor.visit(parser.file());
     } catch (ParseCancellationException ex) {
       throw new ResolveException("Syntax Error", sourcePath, ex);
@@ -119,10 +106,15 @@ public class JimpleConverter {
 
     @Nonnull private final JimpleConverterUtil util;
     @Nonnull private final Path path;
+    @Nonnull private final List<BodyInterceptor> bodyInterceptors;
+    @Nonnull private final View view;
 
-    public ClassVisitor(@Nonnull Path path) {
+    public ClassVisitor(
+        @Nonnull Path path, @Nonnull List<BodyInterceptor> bodyInterceptors, @Nonnull View view) {
       this.path = path;
       util = new JimpleConverterUtil(path);
+      this.bodyInterceptors = bodyInterceptors;
+      this.view = view;
     }
 
     private ClassType clazz = null;
@@ -197,8 +189,31 @@ public class JimpleConverter {
             throw new ResolveException(
                 "Method with the same Signature does already exist.", path, m.getPosition());
           }
-          methods.add(m);
-
+          if (m.isConcrete()) {
+            Body.BodyBuilder bodyBuilder = Body.builder(m.getBody(), m.getModifiers());
+            for (BodyInterceptor bodyInterceptor : bodyInterceptors) {
+              try {
+                bodyInterceptor.interceptBody(bodyBuilder, view);
+                bodyBuilder
+                    .getStmtGraph()
+                    .validateStmtConnectionsInGraph(); // TODO: remove in the future ;-)
+              } catch (Exception e) {
+                throw new IllegalStateException(
+                    "Failed to apply " + bodyInterceptor + " to " + m.getSignature(), e);
+              }
+            }
+            Body modifiedBody = bodyBuilder.build();
+            SootMethod sm =
+                new SootMethod(
+                    new OverridingBodySource(m.getBodySource()).withBody(modifiedBody),
+                    m.getSignature(),
+                    m.getModifiers(),
+                    m.getExceptionSignatures(),
+                    m.getPosition());
+            methods.add(sm);
+          } else {
+            methods.add(m);
+          }
         } else {
           final JimpleParser.FieldContext fieldCtx = ctx.member(i).field();
           EnumSet<FieldModifier> modifier = getFieldModifiers(fieldCtx.field_modifier());

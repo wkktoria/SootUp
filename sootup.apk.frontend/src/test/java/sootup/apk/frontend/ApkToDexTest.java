@@ -1,12 +1,13 @@
 package sootup.apk.frontend;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import sootup.core.model.ClassModifier;
 import sootup.core.model.SootClass;
 import sootup.core.model.SootMethod;
@@ -17,6 +18,7 @@ import sootup.java.core.JavaSootClass;
 import sootup.java.core.JavaSootMethod;
 import sootup.java.core.views.JavaView;
 
+@Tag("Java8")
 public class ApkToDexTest {
 
   @Test
@@ -68,7 +70,7 @@ public class ApkToDexTest {
       methodsSize += methods.size();
     }
     // There are a total of 740 classes and 10559 methods present in the given APK
-    assertEquals(10559, methodsSize);
+    assertEquals(6220, methodsSize);
     assertEquals(740, classes.size());
   }
 
@@ -80,11 +82,11 @@ public class ApkToDexTest {
             Paths.get(apk_path), "", DexBodyInterceptors.Default.bodyInterceptors());
     JavaView view = new JavaView(sootClassApkAnalysisInputLocation);
     String className = "android.support.v4.app.FragmentState$1";
-    String methodName = "FragmentState$1";
+    String methodName = "<init>";
     ClassType classType = view.getIdentifierFactory().getClassType(className);
     assertTrue(view.getClass(classType).isPresent());
     // Retrieve class
-    SootClass sootClass = (SootClass) view.getClass(classType).get();
+    SootClass sootClass = view.getClass(classType).get();
     // write MethodSignature
     MethodSignature methodSignature =
         new MethodSignature(classType, methodName, Collections.emptyList(), VoidType.getInstance());

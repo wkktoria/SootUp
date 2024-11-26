@@ -30,8 +30,14 @@ public class JimpleConverterTest {
 
   private SootClass parseJimpleClass(CharStream cs) throws ResolveException {
     JimpleConverter jimpleVisitor = new JimpleConverter();
+    EagerInputLocation eagerInputLocation = new EagerInputLocation();
     final OverridingClassSource scs =
-        jimpleVisitor.run(cs, new EagerInputLocation(), Paths.get(""));
+        jimpleVisitor.run(
+            cs,
+            eagerInputLocation,
+            Paths.get(""),
+            Collections.emptyList(),
+            new JimpleView(eagerInputLocation));
     return new SootClass(scs, SourceType.Application);
   }
 

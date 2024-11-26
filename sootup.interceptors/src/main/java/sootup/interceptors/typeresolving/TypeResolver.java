@@ -81,7 +81,8 @@ public class TypeResolver {
         new TypePromotionVisitor(builder, evalFunction, hierarchy);
     typings = typings.stream().map(promotionVisitor::getPromotedTyping).collect(Collectors.toSet());
 
-    // Promote `null`/`BottomType` types to `Object`.
+    // Promote `null`/`BottomType`/'TopType' types to `Object`, and other types which have
+    // UnsupportedOperation in TypePromotionVisitor.
     for (Typing typing : typings) {
       for (Local local : locals) {
         typing.set(local, convertUnderspecifiedType(typing.getType(local)));
@@ -243,7 +244,7 @@ public class TypeResolver {
           // when `local` has an array type, the type of `rhs` needs to be assignable as an element
           // of that array
           Collection<Type> leastCommonAncestorsElement =
-              hierarchy.getLeastCommonAncestor(elementType, rhsType);
+              hierarchy.getLeastCommonAncestors(elementType, rhsType);
           leastCommonAncestors =
               leastCommonAncestorsElement.stream()
                   .map(type -> Type.createArrayType(type, 1))
@@ -252,10 +253,10 @@ public class TypeResolver {
           // when `local` isn't an array type, but is used as an array, its type has to be
           // compatible with `[rhs][]`
           leastCommonAncestors =
-              hierarchy.getLeastCommonAncestor(oldType, Type.createArrayType(rhsType, 1));
+              hierarchy.getLeastCommonAncestors(oldType, Type.createArrayType(rhsType, 1));
         }
       } else {
-        leastCommonAncestors = hierarchy.getLeastCommonAncestor(oldType, rhsType);
+        leastCommonAncestors = hierarchy.getLeastCommonAncestors(oldType, rhsType);
       }
 
       assert !leastCommonAncestors.isEmpty();
@@ -353,6 +354,12 @@ public class TypeResolver {
       // It is probably possible to use the debug information to choose a type here, but that
       // complexity is not worth it for such an edge case.
       return objectType;
+    } else if (type instanceof AugmentIntegerTypes.Integer1Type) {
+      return PrimitiveType.getBoolean();
+    } else if (type instanceof AugmentIntegerTypes.Integer127Type) {
+      return PrimitiveType.getByte();
+    } else if (type instanceof AugmentIntegerTypes.Integer32767Type) {
+      return PrimitiveType.getShort();
     } else {
       return type;
     }

@@ -23,6 +23,7 @@ package sootup.core.jimple.basic;
  */
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import sootup.core.graph.StmtGraph;
@@ -151,6 +152,20 @@ public class Local implements Immediate, LValue, Acceptor<ImmediateVisitor> {
       }
     }
     return defStmts;
+  }
+
+  public List<Stmt> getStmtsUsingOrDefiningthisLocal(Collection<Stmt> stmts, Stmt removedStmt) {
+    List<Stmt> localOccurrences = new ArrayList<>();
+    for (Stmt stmt : stmts) {
+      if (stmt.equivTo(removedStmt)) continue;
+      List<Value> stmtUsesAndDefs = stmt.getUsesAndDefs().collect(Collectors.toList());
+      for (Value stmtUse : stmtUsesAndDefs) {
+        if (stmtUse instanceof Local && stmtUse.equivTo(this)) {
+          localOccurrences.add(stmt);
+        }
+      }
+    }
+    return localOccurrences;
   }
 
   @Override

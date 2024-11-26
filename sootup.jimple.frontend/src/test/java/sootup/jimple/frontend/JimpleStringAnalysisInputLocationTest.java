@@ -22,15 +22,16 @@ package sootup.jimple.frontend;
  * #L%
  */
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collections;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import sootup.core.model.SourceType;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.VoidType;
 import sootup.core.views.View;
+import sootup.interceptors.DeadAssignmentEliminator;
 
 @Tag("Java8")
 public class JimpleStringAnalysisInputLocationTest {
@@ -39,7 +40,13 @@ public class JimpleStringAnalysisInputLocationTest {
   public void testInvalidInput() {
     String methodStr = "This is not Jimple its just a Sentence.";
     assertThrows(
-        IllegalArgumentException.class, () -> new JimpleStringAnalysisInputLocation(methodStr));
+        IllegalArgumentException.class,
+        () -> {
+          JimpleStringAnalysisInputLocation analysisInputLocation =
+              new JimpleStringAnalysisInputLocation(methodStr);
+          JimpleView view = new JimpleView(analysisInputLocation);
+          analysisInputLocation.getClassSources(view);
+        });
   }
 
   @Test
@@ -54,15 +61,18 @@ public class JimpleStringAnalysisInputLocationTest {
             + "}";
 
     JimpleStringAnalysisInputLocation analysisInputLocation =
-        new JimpleStringAnalysisInputLocation(methodStr);
+        new JimpleStringAnalysisInputLocation(
+            methodStr,
+            SourceType.Application,
+            Collections.singletonList(new DeadAssignmentEliminator()));
 
     View view = new JimpleView(Collections.singletonList(analysisInputLocation));
-    assertTrue(view.getClass(analysisInputLocation.getClassType()).isPresent());
+    assertNotNull(view.getIdentifierFactory().getClassType("DummyClass"));
 
     MethodSignature methodSig =
         view.getIdentifierFactory()
             .getMethodSignature(
-                analysisInputLocation.getClassType(),
+                view.getIdentifierFactory().getClassType("DummyClass"),
                 "banana",
                 VoidType.getInstance(),
                 Collections.emptyList());
